@@ -4,7 +4,7 @@ import csv
 import re
 
 
-class MediaMarktScrapper:
+class MediaMarktScraper:
     progress_bar = ''
 
     __list_of_products_url = []
@@ -43,7 +43,7 @@ class MediaMarktScrapper:
             self.__spec_disc_capacity) + ',' + str(self.__spec_display) + ',' + str(self.__spec_work_time) + ',' + str(
             self.__spec_operating_system) + ',' + str(self.__spec_guaranty)
 
-        with open('computers-specification.csv', 'a+', newline='') as data_file:
+        with open('computers-specification-media-markt.csv', 'a+', newline='') as data_file:
             csv_writer = csv.writer(data_file, delimiter=';', quotechar=' ')
             csv_writer.writerow((main_string,))
 
@@ -185,7 +185,46 @@ class MediaMarktScrapper:
             #     break
 
 
-# main
-scrapper = MediaMarktScrapper()
+class MoreleNetScraper:
+    __laptops_catalog_url = 'https://www.morele.net/laptopy/laptopy/notebooki-laptopy-ultrabooki-31/,,,,,,,,0,,,,/'
+    __list_of_products_url = []
+    __tabs_amount = 1
 
-scrapper.main()
+    def get_amount_of_tabs(self):
+        main_site_response = requests.get(self.__laptops_catalog_url + '1')
+
+        main_site_content = str(main_site_response.text)
+
+        main_site_soup = bs(main_site_content, 'html.parser')
+
+        amount_string_with_trash = main_site_soup.find('span', attrs={'class': 'm-pagination_count'}).text
+
+        self.__tabs_amount = int(''.join(x for x in amount_string_with_trash if x.isdigit()))
+
+    def make_list_of_products_uls(self):
+        print('------1-------')
+
+        for page_num in range(1, 50):
+            print('------2-------')
+            main_site_response = requests.get(self.__laptops_catalog_url + str(page_num) + '/')
+
+            main_site_content = str(main_site_response.text)
+
+            main_site_soup = bs(main_site_content, 'html.parser')
+
+            list_of_link_dom_element = main_site_soup.find_all('a', attrs={'class': 'productLink'})
+
+            for link_element in list_of_link_dom_element:
+                url = link_element['href']
+                self.__list_of_products_url.append('https://www.morele.net/' + url)
+
+            print(len(self.__list_of_products_url))
+            print(self.__list_of_products_url)
+
+
+# main
+# mediaMarktScraper = MediaMarktScraper()
+# mediaMarktScraper.main()
+
+moreleNetScraper = MoreleNetScraper()
+moreleNetScraper.make_list_of_products_uls()
