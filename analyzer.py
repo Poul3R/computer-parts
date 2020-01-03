@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 column_names = ['Cena', 'Ilość rdzeni', 'RAM', 'Rodzaj dysku', 'Pojemność dysku', 'Przekatna ekranu', 'Czas pracy',
                 'System operacyjny', 'Gwarancja']
@@ -40,4 +41,15 @@ def get_statistics(column, statistic):
             'median': median
         }
 
-print(get_statistics('Ilość rdzeni', 'average'))
+
+def pearson_correlation():
+    pearsoncorr = computers_data.corr(method="pearson")
+
+    plt.matshow(pearsoncorr)
+    plt.show()
+    # print(pearsoncorr)
+
+
+# print(get_statistics('Ilość rdzeni', 'average'))
+
+pearson_correlation()
