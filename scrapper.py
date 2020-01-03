@@ -8,9 +8,11 @@ class MediaMarktScrapper:
     progress_bar = ''
 
     __list_of_products_url = []
-    __laptops_catalog_url = 'https://mediamarkt.pl/komputery-i-tablety/laptopy-laptopy-2-w-1?sort=0&limit=100&page=1'
+    __laptops_catalog_url = 'https://mediamarkt.pl/komputery-i-tablety/laptopy-laptopy-2-w-1?sort=0&limit=100&page='
 
     __price = None
+    __tabs_amount = None
+
     __spec_core = None  # Ilość rdzeni
     __spec_ram = None  # Pamięć RAM
     __spec_disc_type = None  # Rodzaj dysku
@@ -21,17 +23,19 @@ class MediaMarktScrapper:
     __spec_guaranty = None  # Okres gwarancji
 
     def make_list_of_products_uls(self):
-        main_site_response = requests.get(self.__laptops_catalog_url)
 
-        main_site_content = str(main_site_response.text)
+        for page_num in range(1, self.__tabs_amount):
+            main_site_response = requests.get(self.__laptops_catalog_url + str(page_num))
 
-        main_site_soup = bs(main_site_content, 'html.parser')
+            main_site_content = str(main_site_response.text)
 
-        list_of_link_dom_element = main_site_soup.find_all('a', attrs={'class': 'js-product-name'})
+            main_site_soup = bs(main_site_content, 'html.parser')
 
-        for link_element in list_of_link_dom_element:
-            url = link_element['href']
-            self.__list_of_products_url.append('https://mediamarkt.pl/' + url)
+            list_of_link_dom_element = main_site_soup.find_all('a', attrs={'class': 'js-product-name'})
+
+            for link_element in list_of_link_dom_element:
+                url = link_element['href']
+                self.__list_of_products_url.append('https://mediamarkt.pl/' + url)
 
     def save_computer_spec_to_file(self):
         main_string = str(self.__price) + ',' + str(self.__spec_core) + ',' + str(self.__spec_ram) + ',' + str(
@@ -153,7 +157,22 @@ class MediaMarktScrapper:
         self.progress_bar += '#'
         print(self.progress_bar)
 
+    def get_amount_of_tabs(self):
+        main_site_response = requests.get(self.__laptops_catalog_url + '1')
+
+        main_site_content = str(main_site_response.text)
+
+        main_site_soup = bs(main_site_content, 'html.parser')
+
+        amount_string_with_trash = main_site_soup.find('span', attrs={'class': 'm-pagination_count'}).text
+
+        self.__tabs_amount = int(''.join(x for x in amount_string_with_trash if x.isdigit()))
+
     def main(self):
+        self.get_amount_of_tabs()
+
+        print('ilosc --> ' + str(len(self.__list_of_products_url)))
+
         self.make_list_of_products_uls()
 
         counter = 0

@@ -40,4 +40,4 @@ def get_statistics(column, statistic):
             'median': median
         }
 
-print(get_statistics('Ilość rdzeni', 'moxxxde'))
+print(get_statistics('Ilość rdzeni', 'average'))
