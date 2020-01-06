@@ -26,9 +26,6 @@ def get_statistics(column, statistic):
     elif statistic == 'median':  # mediana
         return column_selected.median()
 
-    elif statistic == 'kwartyle':
-        return None
-
     else:
         average = column_selected.mean()
         standard_deviation = None
