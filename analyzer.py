@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-column_names = ['Cena', 'Ilość rdzeni', 'RAM', 'Rodzaj dysku', 'Pojemność dysku', 'Przekatna ekranu', 'Czas pracy',
+column_names = ['Cena', 'Ilość rdzeni', 'RAM', 'Rodzaj dysku', 'Pojemność dysku', 'Przekatna ekranu',
                 'System operacyjny', 'Gwarancja']
 
-computers_data = pd.read_csv('computers-specification.csv', names=column_names)
+computers_data = pd.read_csv('computers-specification-media-markt.csv', names=column_names)
 
 
 # print(computers_data[['Cena']])
@@ -43,8 +43,10 @@ def pearson_correlation():
     pearsoncorr = computers_data.corr(method="pearson")
 
     plt.matshow(pearsoncorr)
+    plt.title('Ceny laptopa wzgędem jego parametrów')
+    plt.legend((1, 2, 3, 4, 5), ('Cena', 'Ilość rdzeni', 'RAM', 'Rodzaj dysku', 'Pojemność dysku', 'Przekatna ekranu',
+                'System operacyjny', 'Gwarancja'))
     plt.show()
-    # print(pearsoncorr)
 
 
 # print(get_statistics('Ilość rdzeni', 'average'))

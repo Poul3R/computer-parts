@@ -16,7 +16,6 @@ class MediaMarktScraper:
     __spec_disc_type = None  # Rodzaj dysku
     __spec_disc_capacity = None  # Dysk SSD
     __spec_display = None  # Przekątna ekranu
-    __spec_work_time = None  # Maksymalny czas pracy
     __spec_operating_system = None  # System operacyjny
     __spec_guaranty = None  # Okres gwarancji
 
@@ -38,7 +37,7 @@ class MediaMarktScraper:
     def save_computer_spec_to_file(self):
         main_string = str(self.__price) + ',' + str(self.__spec_core) + ',' + str(self.__spec_ram) + ',' + str(
             self.__spec_disc_type) + ',' + str(
-            self.__spec_disc_capacity) + ',' + str(self.__spec_display) + ',' + str(self.__spec_work_time) + ',' + str(
+            self.__spec_disc_capacity) + ',' + str(self.__spec_display) + ',' + str(
             self.__spec_operating_system) + ',' + str(self.__spec_guaranty)
 
         with open('computers-specification-media-markt.csv', 'a+', newline='') as data_file:
@@ -134,9 +133,6 @@ class MediaMarktScraper:
                 if 'Przekątna ekranu' in spec_title:
                     self.__spec_display = float(spec_value)
 
-                if 'Maksymalny czas pracy' in spec_title:
-                    self.__spec_work_time = int(spec_value)
-
                 if 'System operacyjny' in spec_title:
                     if 'Windows' in spec_value:
                         self.__spec_operating_system = 'Windows'
@@ -169,14 +165,8 @@ class MediaMarktScraper:
 
         self.make_list_of_products_uls()
 
-        counter = 0
-
         for url in self.__list_of_products_url:
             self.get_computer_spec(url)
-            counter += 1
-
-            # if counter > 5:
-            #     break
 
 
 class MoreleNetScraper:
@@ -213,10 +203,9 @@ class MoreleNetScraper:
         # self.__tabs_amount = int(''.join(x for x in amount_string_with_trash if x.isdigit()))
 
     def make_list_of_products_uls(self):
-        counter_computer = 0
-        counter_page = 0
 
-        for page_num in range(1, self.__tabs_amount):
+        # for page_num in range(1, self.__tabs_amount):
+        for page_num in range(1, 4):
             main_site_response = requests.get(self.__laptops_catalog_url + str(page_num) + '/')
 
             main_site_content = str(main_site_response.text)
@@ -225,19 +214,9 @@ class MoreleNetScraper:
 
             list_of_link_dom_element = main_site_soup.find_all('a', attrs={'class': 'productLink'})
 
-            # for presentation purpose only
-            counter_page += 1
-            print('-----' + str(counter_page) + '-----')
-            if counter_page > 2:
-                break
-
             for link_element in list_of_link_dom_element:
                 url = link_element['href']
                 self.__list_of_products_url.append('https://www.morele.net/' + url)
-
-                # for presentation purpose only
-                counter_computer += 1
-                print(counter_computer)
 
     def save_computer_spec_to_file(self):
         main_string = str(self.__price) + ',' + str(self.__spec_core) + ',' + str(self.__spec_ram) + ',' + str(
@@ -257,32 +236,29 @@ class MoreleNetScraper:
         product_site_soup = bs(product_site_content, 'html.parser')
 
         # get product price
-        price_dom_obj = product_site_soup.find('div', attrs={'id': 'product_price_brutto'})
-        final_price = price_dom_obj['content']
+        try:
+            price_dom_obj = product_site_soup.find('div', attrs={'id': 'product_price_brutto'})
 
-        self.__price = float(final_price)
+            final_price = price_dom_obj['content']
+
+            self.__price = float(final_price)
+        except:
+            print('x')
 
         # get product specification
         specification_list = product_site_soup.find_all('div', attrs={'class': 'table-info-item'})
-        print(len(specification_list))
 
         for property in specification_list:
             try:
-                spec_title = property.find('div', attrs={'class': 'table-info-inner name'}).string
-                # spec_value = property.find('div', attrs={'class': 'table-info-inner'}).find('div', attrs={
-                #     'class': 'info-item'}).text
+                spec_title = property.find('div', attrs={'class': 'table-info-inner name'}).find('a').text
 
-                spec_value = property.find('div', attrs={'class': 'table-info-inner name'}).string
-                print(spec_value)
-                print('=====================')
+                spec_value = property.find('div', attrs={'class', 'info-item'}).text
 
                 if 'Liczba rdzeni / wątków' in spec_title:
-                    self.__spec_core = int(''.join(x for x in spec_value if x.isdigit()))
-                    print(spec_value)
+                    self.__spec_core = int(re.search(r"^[0-9]{1,}", spec_value).group())
 
                 if 'Pamięć RAM (zainstalowana)' in spec_title:
                     self.__spec_ram = int(re.search(r'\d+', spec_value).group())
-                    print(spec_value)
 
                 # ---- Disc type and capacity
                 if 'Dysk HDD' in spec_title:
@@ -290,17 +266,23 @@ class MoreleNetScraper:
                         self.__spec_disc_type = 'SSD'
                     else:
                         self.__spec_disc_type = 'HDD'
-                        self.__spec_disc_capacity = int(''.join(x for x in spec_value if x.isdigit()))
+                        self.__spec_disc_capacity = int(re.search(r"^[0-9]{1,}", spec_value).group())
 
                 if 'Dysk SSD' == spec_title:
-                    if 'Brak' in spec_value:
-                        self.__spec_disc_type = ''
+                    if 'Brak' not in spec_value:
+                        self.__spec_disc_type = 'SSD'
+                        self.__spec_disc_capacity = int(re.search(r"^[0-9]{1,}", spec_value).group())
 
                 if 'Dysk SSD M.2' in spec_title:
-                    None
+                    if 'Brak' not in spec_value:
+                        self.__spec_disc_type = 'SSD'
+                        self.__spec_disc_capacity = int(re.search(r"^[0-9]{1,}", spec_value).group())
 
-                if 'Dysk SSD M.2 PCIe':
-                    None
+                if 'Dysk SSD M.2 PCIe' in spec_title:
+
+                    if 'Brak' not in spec_value:
+                        self.__spec_disc_type = 'SSD'
+                        self.__spec_disc_capacity = int(re.search(r"^[0-9]{1,}", spec_value).group())
 
                 if 'Przekątna ekranu [cal]' in spec_title:
                     self.__spec_display = float(spec_value)
@@ -313,38 +295,61 @@ class MoreleNetScraper:
                     else:
                         self.__spec_operating_system = 'Other'
 
-                if 'Długość' in spec_title:
-                    self.__spec_guaranty = int(''.join(x for x in spec_value if x.isdigit()))
-                    print(self.__spec_guaranty + '<------')
-
             except BaseException as err:
                 # print(err)
                 continue
+
+        # get warranty
+        # warranty_table = product_site_soup.find('div', attrs={'class': 'warranty-table specification-table'})
+        # warranty_table_sections = warranty_table.find_all('div', attrs={'class', 'table-info'})
+        #
+        # for section in warranty_table_sections:
+        #     rows = section.find_all('div', attrs={'class', 'table-info-item'})
+        #
+        #     for row in rows:
+        #         name = row.find('div', attrs={'class', 'table-info-inner name'}).text
+        #         value = row.find('div', attrs={'class', 'info-item'}).text
+        #
+        #         if 'Długość' in name:
+        #             self.__spec_guaranty = int(re.search(r"[0-9]{1,}", value).group())
+
+        # for test purpose only
+        print(self.__price)
+        print(self.__spec_core)
+        print(self.__spec_ram)
+        print(self.__spec_disc_type)
+        print(self.__spec_disc_capacity)
+        print(self.__spec_display)
+        print(self.__spec_operating_system)
+        print(self.__spec_guaranty)
 
         self.save_computer_spec_to_file()
 
     def main(self):
         self.get_amount_of_tabs()
 
+        print('amount of tabs ---> ' + str(self.__tabs_amount))
+
         self.make_list_of_products_uls()
 
         counter = 0
 
+        print('amount of products ---> ' + str(len(self.__list_of_products_url)))
+
         for url in self.__list_of_products_url:
+
             self.get_computer_spec(url)
+
             counter += 1
 
-            if counter > 1:
+            if counter > 10:
                 break
 
 
 # main
-# mediaMarktScraper = MediaMarktScraper()
-# mediaMarktScraper.main()
+mediaMarktScraper = MediaMarktScraper()
+mediaMarktScraper.main()
 
 # moreleNetScraper = MoreleNetScraper()
 # moreleNetScraper.main()
 # moreleNetScraper.get_computer_spec('https://www.morele.net/laptop-hp-15-db1010nw-7kc24ea-5940527/')
-
-# ToDo:: Usunąć work time - czas pracy dla laptopa
-# ToDo:: Dokończyć pobieranie informacji o dysku z morele.net
