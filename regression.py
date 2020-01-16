@@ -7,4 +7,3 @@ boston = datasets.load_boston(return_X_y=False)
 X = boston.data
 
 y = boston.target
-
