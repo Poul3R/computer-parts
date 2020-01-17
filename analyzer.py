@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn import linear_model
+
+
 
 column_names = ['Cena', 'Ilość rdzeni', 'RAM', 'Rodzaj dysku', 'Pojemność dysku', 'Przekatna ekranu',
                 'System operacyjny', 'Gwarancja']
@@ -45,10 +48,22 @@ def pearson_correlation():
     plt.matshow(pearsoncorr)
     plt.title('Ceny laptopa wzgędem jego parametrów')
     plt.legend((1, 2, 3, 4, 5), ('Cena', 'Ilość rdzeni', 'RAM', 'Rodzaj dysku', 'Pojemność dysku', 'Przekatna ekranu',
-                'System operacyjny', 'Gwarancja'))
+                                 'System operacyjny', 'Gwarancja'))
     plt.show()
 
 
 # print(get_statistics('Ilość rdzeni', 'average'))
 
-pearson_correlation()
+# pearson_correlation()
+
+def linear_regression(specification):
+    reg = linear_model.LinearRegression()
+    reg.fit(computers_data[['Ilość rdzeni', 'RAM', 'Pojemność dysku', 'Przekatna ekranu',
+                            'Gwarancja']], computers_data.Cena)
+
+    predicted_price = reg.predict([specification])
+    return predicted_price
+
+
+if __name__ == "__main__":
+    print("This script is part of bigger program. Please use MAIN.py script to run")
