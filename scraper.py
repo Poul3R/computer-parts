@@ -1,7 +1,13 @@
+import sys
+
 from bs4 import BeautifulSoup as bs
 import requests
 import csv
 import re
+
+if __name__ == "__main__":
+    print("Please use MAIN.py script to run.")
+    sys.exit()
 
 
 class MediaMarktScraper:
@@ -143,7 +149,6 @@ class MediaMarktScraper:
 
                 if 'Okres gwarancji' in spec_title:
                     self.__spec_guaranty = int(''.join(x for x in spec_value if x.isdigit()))
-
             except:
                 continue
 
@@ -344,12 +349,3 @@ class MoreleNetScraper:
 
             if counter > 10:
                 break
-
-
-# main
-mediaMarktScraper = MediaMarktScraper()
-mediaMarktScraper.main()
-
-# moreleNetScraper = MoreleNetScraper()
-# moreleNetScraper.main()
-# moreleNetScraper.get_computer_spec('https://www.morele.net/laptop-hp-15-db1010nw-7kc24ea-5940527/')
