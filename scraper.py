@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
+
+import csv
+import os
+import re
 import sys
 
-from bs4 import BeautifulSoup as bs
 import requests
-import csv
-import re
+from bs4 import BeautifulSoup as bs
 
 if __name__ == "__main__":
     print("Please use MAIN.py script to run.")
@@ -170,6 +173,12 @@ class MediaMarktScraper:
 
         self.make_list_of_products_uls()
 
+        if os.path.isfile('computers-specification-media-markt.csv'):
+            os.remove('computers-specification-media-markt.csv')
+
+        print(
+            str(len(self.__list_of_products_url)) + " products founded. Now, program is scraping data from all of them")
+
         for url in self.__list_of_products_url:
             self.get_computer_spec(url)
 
@@ -203,6 +212,7 @@ class MoreleNetScraper:
             x = pagination.find('a')['data-page']
             list_of_pagintations.append(int(x))
 
+        print(list_of_pagintations[-1])
         self.__tabs_amount = list_of_pagintations[-1]
 
         # self.__tabs_amount = int(''.join(x for x in amount_string_with_trash if x.isdigit()))
@@ -210,7 +220,7 @@ class MoreleNetScraper:
     def make_list_of_products_uls(self):
 
         # for page_num in range(1, self.__tabs_amount):
-        for page_num in range(1, 4):
+        for page_num in range(1, 2):
             main_site_response = requests.get(self.__laptops_catalog_url + str(page_num) + '/')
 
             main_site_content = str(main_site_response.text)
@@ -221,7 +231,7 @@ class MoreleNetScraper:
 
             for link_element in list_of_link_dom_element:
                 url = link_element['href']
-                self.__list_of_products_url.append('https://www.morele.net/' + url)
+                self.__list_of_products_url.append('https://www.morele.net' + url)
 
     def save_computer_spec_to_file(self):
         main_string = str(self.__price) + ',' + str(self.__spec_core) + ',' + str(self.__spec_ram) + ',' + str(
@@ -248,7 +258,7 @@ class MoreleNetScraper:
 
             self.__price = float(final_price)
         except:
-            print('x')
+            print('Can not get product price')
 
         # get product specification
         specification_list = product_site_soup.find_all('div', attrs={'class': 'table-info-item'})
@@ -305,18 +315,18 @@ class MoreleNetScraper:
                 continue
 
         # get warranty
-        # warranty_table = product_site_soup.find('div', attrs={'class': 'warranty-table specification-table'})
-        # warranty_table_sections = warranty_table.find_all('div', attrs={'class', 'table-info'})
-        #
-        # for section in warranty_table_sections:
-        #     rows = section.find_all('div', attrs={'class', 'table-info-item'})
-        #
-        #     for row in rows:
-        #         name = row.find('div', attrs={'class', 'table-info-inner name'}).text
-        #         value = row.find('div', attrs={'class', 'info-item'}).text
-        #
-        #         if 'Długość' in name:
-        #             self.__spec_guaranty = int(re.search(r"[0-9]{1,}", value).group())
+        warranty_table = product_site_soup.find('div', attrs={'class': 'warranty-table specification-table'})
+        warranty_table_sections = warranty_table.find_all('div', attrs={'class', 'table-info'})
+
+        for section in warranty_table_sections:
+            rows = section.find_all('div', attrs={'class', 'table-info-item'})
+
+            for row in rows:
+                name = row.find('div', attrs={'class', 'table-info-inner name'}).text
+                value = row.find('div', attrs={'class', 'info-item'}).text
+
+                if 'Długość' in name:
+                    self.__spec_guaranty = int(re.search(r"[0-9]{1,}", value).group())
 
         # for test purpose only
         print(self.__price)
@@ -333,19 +343,13 @@ class MoreleNetScraper:
     def main(self):
         self.get_amount_of_tabs()
 
-        print('amount of tabs ---> ' + str(self.__tabs_amount))
-
         self.make_list_of_products_uls()
 
-        counter = 0
+        if os.path.isfile('computers-specification-morele-net.csv'):
+            os.remove('computers-specification-morele-net.csv')
 
-        print('amount of products ---> ' + str(len(self.__list_of_products_url)))
+        print(
+            str(len(self.__list_of_products_url)) + " products founded. Now, program is scraping data from all of them")
 
         for url in self.__list_of_products_url:
-
             self.get_computer_spec(url)
-
-            counter += 1
-
-            if counter > 10:
-                break
