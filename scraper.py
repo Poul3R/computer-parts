@@ -198,6 +198,8 @@ class MoreleNetScraper:
     __spec_operating_system = None  # System operacyjny
     __spec_guaranty = None  # Okres gwarancji
 
+    test_counter = 0
+
     def get_amount_of_tabs(self):
         main_site_response = requests.get(self.__laptops_catalog_url)
 
@@ -219,8 +221,7 @@ class MoreleNetScraper:
 
     def make_list_of_products_uls(self):
 
-        # for page_num in range(1, self.__tabs_amount):
-        for page_num in range(1, 2):
+        for page_num in range(1, self.__tabs_amount):
             main_site_response = requests.get(self.__laptops_catalog_url + str(page_num) + '/')
 
             main_site_content = str(main_site_response.text)
@@ -258,7 +259,7 @@ class MoreleNetScraper:
 
             self.__price = float(final_price)
         except:
-            print('Can not get product price')
+            pass
 
         # get product specification
         specification_list = product_site_soup.find_all('div', attrs={'class': 'table-info-item'})
@@ -329,14 +330,14 @@ class MoreleNetScraper:
                     self.__spec_guaranty = int(re.search(r"[0-9]{1,}", value).group())
 
         # for test purpose only
-        print(self.__price)
-        print(self.__spec_core)
-        print(self.__spec_ram)
-        print(self.__spec_disc_type)
-        print(self.__spec_disc_capacity)
-        print(self.__spec_display)
-        print(self.__spec_operating_system)
-        print(self.__spec_guaranty)
+        # print(self.__price)
+        # print(self.__spec_core)
+        # print(self.__spec_ram)
+        # print(self.__spec_disc_type)
+        # print(self.__spec_disc_capacity)
+        # print(self.__spec_display)
+        # print(self.__spec_operating_system)
+        # print(self.__spec_guaranty)
 
         self.save_computer_spec_to_file()
 
@@ -353,3 +354,6 @@ class MoreleNetScraper:
 
         for url in self.__list_of_products_url:
             self.get_computer_spec(url)
+
+            self.test_counter += 1
+            print(self.test_counter)

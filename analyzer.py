@@ -6,6 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
+from sklearn.cluster import KMeans
+import numpy as np
 
 if __name__ == "__main__":
     print("Please use MAIN.py script to run.")
@@ -16,7 +18,11 @@ class Analyzer:
     column_names = ['price', 'core', 'ram', 'disc_type', 'disc_capacity', 'display',
                     'os', 'warranty']
 
-    computers_data = pd.read_csv('computers-specification-media-markt.csv', names=column_names)
+    computers_data_media = pd.read_csv('computers-specification-media-markt.csv', names=column_names)
+    computers_data_morele = pd.read_csv('computers-specification-media-markt.csv', names=column_names)
+    frames = [computers_data_media, computers_data_morele]
+
+    computers_data = pd.concat(frames)
 
     def prepare_data(self):
         self.computers_data.disc_type = self.computers_data.disc_type.replace('SSD', 1)
@@ -78,3 +84,12 @@ class Analyzer:
         effectiveness = reg.score(x_test, y_test)
 
         return predicted_price, effectiveness
+
+    def clustering(self):
+        clf = KMeans(n_clusters=5)
+        clf.fit(self.computers_data)
+
+        centroids = clf.cluster_centers_
+        labels = clf.labels_
+
+        colors = ["", ""]
