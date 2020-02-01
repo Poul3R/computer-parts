@@ -329,16 +329,6 @@ class MoreleNetScraper:
                 if 'Długość' in name:
                     self.__spec_guaranty = int(re.search(r"[0-9]{1,}", value).group())
 
-        # for test purpose only
-        # print(self.__price)
-        # print(self.__spec_core)
-        # print(self.__spec_ram)
-        # print(self.__spec_disc_type)
-        # print(self.__spec_disc_capacity)
-        # print(self.__spec_display)
-        # print(self.__spec_operating_system)
-        # print(self.__spec_guaranty)
-
         self.save_computer_spec_to_file()
 
     def main(self):

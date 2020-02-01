@@ -29,3 +29,8 @@ To predict price of laptop with particular components, you have to pass all of t
 - Size of display - Integer or Float
 - Operating system (Windows, macOS or Other) - String
 -  Warranty - Integer
+
+---
+#!!! IMPORTANT !!!
+To scrap data, you will need to send lots of request to stores servers. It is good idea to use VPN to protect your IP against blacklist of those servers.
+ 
