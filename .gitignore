@@ -1,5 +1,3 @@
 /.idea
 /venv
-*.csv
 *.html
-/__pycache_
